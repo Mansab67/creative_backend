@@ -40,17 +40,33 @@ exports.sortTasks = async (req, res) => {
   }
 };
 
-// Create a task
+// ✅ Fix: Create a single task correctly
 exports.createTask = async (req, res) => {
-  // console.log(req.body);
-  const tasks = req.body;
   try {
-    tasks.forEach(async (element) => {
-      const task = await Task.create(element)
-    });
-    res.status(201).json(tasks);
+    const task = await Task.create(req.body);
+    res.status(201).json(task);
   } catch (error) {
     res.status(400).json({ error: "Invalid input" });
+  }
+};
+
+// ✅ New: Update task status for drag-and-drop
+exports.updateTaskStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedTask) return res.status(404).json({ error: "Task not found" });
+
+    res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
   }
 };
 
